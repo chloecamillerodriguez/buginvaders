@@ -13,8 +13,8 @@ export default class EnemyController {
   currentDirection = MovingDirection.right;
   xVelocity = 0;
   yVelocity = 0;
-  defaultXVelocity = 1;
-  defaultYVelocity = 1;
+  defaultXVelocity = 1.5;
+  defaultYVelocity = 1.5;
   moveDownTimerDefault = 30;
   moveDownTimer = this.moveDownTimerDefault;
   fireBulletTimerDefault = 100;
@@ -125,7 +125,7 @@ export default class EnemyController {
   happy = () => {};
 
   createEnemies() {
-    const enemySize = this.canvas.height * 0.005;
+    const enemySize = this.canvas.height * 0.05;
     const padding = enemySize * 1.5;
 
     this.enemyMap.forEach((row, rowIndex) => {

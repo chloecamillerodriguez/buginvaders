@@ -31,6 +31,7 @@ function game() {
 
   checkGameOver();
   displayGameOver();
+
   if (!isGameOver) {
     enemyController.draw(ctx);
     player.draw(ctx);
@@ -41,12 +42,13 @@ function game() {
 
 function displayGameOver() {
   if (isGameOver) {
-    let text = didWin ? "You Win" : "Game Over";
-    let textOffset = didWin ? 3.5 : 5;
+    let text = didWin ? "you win!" : "game over";
 
     ctx.fillStyle = "#00000C";
-    ctx.font = "70px Arial";
-    ctx.fillText(text, canvas.width / textOffset, canvas.height / 2);
+    ctx.font = "2.2em Pixelify Sans";
+    ctx.textAlign = "center";    
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
   }
 }
 
