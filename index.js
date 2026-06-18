@@ -27,7 +27,6 @@ function game() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   checkGameOver();
-  ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   displayGameOver();
   if (!isGameOver) {
     enemyController.draw(ctx);
