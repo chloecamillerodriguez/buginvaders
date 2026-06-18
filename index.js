@@ -44,7 +44,7 @@ function displayGameOver() {
     let text = didWin ? "You Win" : "Game Over";
     let textOffset = didWin ? 3.5 : 5;
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "#00000C";
     ctx.font = "70px Arial";
     ctx.fillText(text, canvas.width / textOffset, canvas.height / 2);
   }

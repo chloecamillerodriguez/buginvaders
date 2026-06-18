@@ -125,7 +125,7 @@ export default class EnemyController {
   happy = () => {};
 
   createEnemies() {
-    const enemySize = this.canvas.width * 0.06;
+    const enemySize = this.canvas.height * 0.05;
     const padding = enemySize * 1.5;
 
     this.enemyMap.forEach((row, rowIndex) => {
