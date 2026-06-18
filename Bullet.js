@@ -7,7 +7,7 @@ export default class Bullet {
     this.bulletColor = bulletColor;
 
     this.width = 5;
-    this.height = 20;
+    this.height = 15;
   }
 
   draw(ctx) {

@@ -7,14 +7,14 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth - 100;
+  canvas.height = window.innerHeight - 100;
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-const playerBulletController = new BulletController(canvas, 10, "red", true);
-const enemyBulletController = new BulletController(canvas, 4, "white", false);
+const playerBulletController = new BulletController(canvas, 10, "#FF8DA1", true);
+const enemyBulletController = new BulletController(canvas, 4, "#00000C", false);
 const enemyController = new EnemyController(
   canvas,
   enemyBulletController,
