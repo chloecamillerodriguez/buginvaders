@@ -6,8 +6,12 @@ console.log('test')
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 600;
-canvas.height = 600;
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 const playerBulletController = new BulletController(canvas, 10, "red", true);
 const enemyBulletController = new BulletController(canvas, 4, "white", false);
@@ -23,9 +27,8 @@ let didWin = false;
 
 function game() {
 
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   checkGameOver();
   displayGameOver();
   if (!isGameOver) {
