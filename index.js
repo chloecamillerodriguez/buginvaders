@@ -9,7 +9,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = 600;
 canvas.height = 600;
 
-background = 'white';
+const background = 'white';
 
 const playerBulletController = new BulletController(canvas, 10, "red", true);
 const enemyBulletController = new BulletController(canvas, 4, "white", false);
