@@ -125,13 +125,17 @@ export default class EnemyController {
   happy = () => {};
 
   createEnemies() {
+    const enemySize = this.canvas.width * 0.06;
+    const padding = enemySize * 1.5;
+
     this.enemyMap.forEach((row, rowIndex) => {
       this.enemyRows[rowIndex] = [];
-      row.forEach((enemyNumber, enemyIndex) => {
-        if (enemyNumber > 0) {
-          this.enemyRows[rowIndex].push(
-            new Enemy(enemyIndex * 50, rowIndex * 35, enemyNumber)
-          );
+      row.forEach((cell, enemyIndex) => {
+       if (cell > 0) { 
+          const enemy = new Enemy(enemyIndex * padding, rowIndex * padding);
+          enemy.width = enemySize;
+          enemy.height = enemySize;
+          this.enemyRows[rowIndex].push(enemy);
         }
       });
     });
