@@ -13,7 +13,7 @@ export default class Player {
     this.width = 14;
     this.height = 14;
     this.image = new Image();
-    this.image.src = "images/player.svg";
+    this.image.src = "Images/player.svg";
 
     document.addEventListener("keydown", this.keydown);
     document.addEventListener("keyup", this.keyup);
