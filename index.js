@@ -25,22 +25,37 @@ let didWin = false;
 function showStartScreen() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#00000C";
-  ctx.font = `${canvas.width * 0.07}px Pixelify Sans`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("Bug Invaders", canvas.width / 2, canvas.height / 3);
+
+  ctx.font = `${canvas.width * 0.07}px Pixelify Sans`;
+  drawLines(["bug invaders"], canvas.height * 0.3, canvas.height * 0.08);
 
   ctx.font = `${canvas.width * 0.025}px Pixelify Sans`;
-  ctx.fillText("use arrow keys to move and space to shoot", canvas.width / 2, canvas.height / 2);
+  drawLines(
+    [
+      "use arrow keys to move",
+      "press space to shoot",
+      "",
+      "destroy all the bugs to win!",
+    ],
+    canvas.height * 0.45,  
+    canvas.height * 0.035  
+  );
 
-  createButton("start-btn", "start game", "62%", () => {
+  createButton("start-btn", "start game", "75%", () => {
     removeButton("start-btn");
     startGame();
   });
 }
 
+function drawLines(lines, startY, lineHeight) {
+  lines.forEach((line, index) => {
+    ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
+  });
+}
+
 function showGameOverScreen() {
-  // ✅ only call once, not every frame
   if (document.getElementById("play-again-btn")) return;
 
   ctx.fillStyle = "#00000C";
@@ -65,10 +80,20 @@ function startGame() {
   player = new Player(canvas, 3, playerBulletController);
 
   if (animationId) cancelAnimationFrame(animationId);
-  animationId = requestAnimationFrame(game); // ✅ start the loop
+  animationId = requestAnimationFrame(game);
 }
 
-function game() {
+const TARGET_FPS = 80;
+const FRAME_DURATION = 1000 / TARGET_FPS;
+let lastFrameTime = 0;
+
+function game(timestamp) {
+  if (timestamp - lastFrameTime < FRAME_DURATION) {
+    animationId = requestAnimationFrame(game);
+    return;
+  }
+  lastFrameTime = timestamp;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   enemyController.draw(ctx);
@@ -79,9 +104,9 @@ function game() {
   checkGameOver();
 
   if (isGameOver) {
-    showGameOverScreen(); // ✅ show screen but don't keep looping
+    showGameOverScreen();
   } else {
-    animationId = requestAnimationFrame(game); // ✅ only continue if game is alive
+    animationId = requestAnimationFrame(game);
   }
 }
 
