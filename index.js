@@ -40,7 +40,7 @@ function showStartScreen() {
       "destroy all the bugs to win!",
     ],
     canvas.height * 0.45,  
-    canvas.height * 0.035  
+    canvas.height * 0.04  
   );
 
   createButton("start-btn", "start game", "75%", () => {
@@ -83,7 +83,7 @@ function startGame() {
   animationId = requestAnimationFrame(game);
 }
 
-const TARGET_FPS = 80;
+const TARGET_FPS = 70;
 const FRAME_DURATION = 1000 / TARGET_FPS;
 let lastFrameTime = 0;
 
