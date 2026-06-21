@@ -5,9 +5,18 @@ import BulletController from "./BulletController.js";
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+let gameStarted = false;
+
+
 function resizeCanvas() {
   canvas.width = window.innerWidth - (window.innerWidth * 0.1);
   canvas.height = window.innerHeight - (window.innerHeight * 0.15);
+
+  if (!gameStarted) {
+    showStartScreen();
+  } else if (isGameOver) {
+    showGameOverScreen();
+  }
   console.log("canvas resized", canvas.width, canvas.height);
 
 }
@@ -78,6 +87,7 @@ function showGameOverScreen() {
 }
 
 function startGame() {
+  gameStarted = true;
   isGameOver = false;
   didWin = false;
 
