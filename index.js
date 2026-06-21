@@ -29,21 +29,21 @@ function showStartScreen() {
   ctx.textBaseline = "middle";
 
   ctx.font = `${canvas.width * 0.07}px Pixelify Sans`;
-  drawLines(["bug invaders"], canvas.height * 0.3, canvas.height * 0.08);
+  drawLines(["oops! something", "went wrong"], canvas.height * 0.3, canvas.height * 0.08);
 
   ctx.font = `${canvas.width * 0.025}px Pixelify Sans`;
   drawLines(
     [
-      "use arrow keys to move",
-      "press space to shoot",
+      "destroy the bugs to return home!",
       "",
-      "destroy all the bugs to win!",
+      "use arrow keys to move",
+      "press space to shoot"
     ],
-    canvas.height * 0.45,  
+    canvas.height * 0.55,  
     canvas.height * 0.04  
   );
 
-  createButton("start-btn", "start game", "75%", () => {
+  createButton("start-btn", "start game", "70%", () => {
     removeButton("start-btn");
     startGame();
   });
@@ -66,8 +66,11 @@ function showGameOverScreen() {
 
   createButton("play-again-btn", "play again", "62%", () => {
     removeButton("play-again-btn");
-    startGame();
-  });
+    startGame();})
+
+  //createButton("home-btn", "home", "75%", () => {
+    //window.location.href = "https://chloecamille.work";
+  //})
 }
 
 function startGame() {
