@@ -8,6 +8,8 @@ const ctx = canvas.getContext("2d");
 function resizeCanvas() {
   canvas.width = window.innerWidth - (window.innerWidth * 0.1);
   canvas.height = window.innerHeight - (window.innerHeight * 0.15);
+  console.log("canvas resized", canvas.width, canvas.height);
+
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
@@ -23,6 +25,8 @@ let didWin = false;
 
 
 function showStartScreen() {
+  console.log("showStartScreen called", canvas.width, canvas.height);
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#00000C";
   ctx.textAlign = "center";
@@ -153,4 +157,6 @@ function removeButton(id) {
   if (button) button.remove();
 }
 
-showStartScreen();
+document.fonts.ready.then(() => {
+  showStartScreen();
+});
