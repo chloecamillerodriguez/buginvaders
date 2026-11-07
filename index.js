@@ -37,20 +37,20 @@ function showStartScreen() {
   console.log("showStartScreen called", canvas.width, canvas.height);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#00000C";
+  ctx.fillStyle = "#2b2b2b";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  ctx.font = `${canvas.width * 0.07}px Pixelify Sans`;
+  ctx.font = `${canvas.width * 0.07}px Geist Mono`;
   drawLines(["oops! something", "went wrong"], canvas.height * 0.3, canvas.height * 0.08);
 
-  ctx.font = `${canvas.width * 0.025}px Pixelify Sans`;
+  ctx.font = `${canvas.width * 0.025}px Geist Mono`;
   drawLines(
     [
-      "destroy the bugs to return home!",
+      "DESTROY THE BUGS TO RETURN HOME!",
       "",
-      "use arrow keys to move",
-      "press space to shoot"
+      "USE ARROW KEYS TO MOVE",
+      "PRESS SPACE TO SHOOT"
     ],
     canvas.height * 0.55,  
     canvas.height * 0.04  
@@ -71,13 +71,13 @@ function drawLines(lines, startY, lineHeight) {
 function showGameOverScreen() {
   if (document.getElementById("play-again-btn")) return;
 
-  ctx.fillStyle = "#00000C";
-  ctx.font = `${canvas.width * 0.07}px Pixelify Sans`;
+  ctx.fillStyle = "#2b2b2b";
+  ctx.font = `${canvas.width * 0.07}px Geist Mono`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(didWin ? "you win" : "game over", canvas.width / 2, canvas.height / 2);
+  ctx.fillText(didWin ? "YOU WIN" : "GAME OVER", canvas.width / 2, canvas.height / 2);
 
-  createButton("play-again-btn", "play again", "62%", () => {
+  createButton("play-again-btn", "PLAY AGAIN", "62%", () => {
     removeButton("play-again-btn");
     startGame();})
 
@@ -91,8 +91,8 @@ function startGame() {
   isGameOver = false;
   didWin = false;
 
-  playerBulletController = new BulletController(canvas, 10, "#FF8DA1", true);
-  enemyBulletController = new BulletController(canvas, 4, "#00000C", false);
+  playerBulletController = new BulletController(canvas, 10, "#BBBD2B", true);
+  enemyBulletController = new BulletController(canvas, 4, "#2b2b2b", false);
   enemyController = new EnemyController(canvas, enemyBulletController, playerBulletController);
   player = new Player(canvas, 3, playerBulletController);
 
@@ -150,11 +150,11 @@ function createButton(id, label, topPercent, onClick) {
     top: ${topPercent};
     left: 50%;
     transform: translateX(-50%);
-    font-family: "Pixelify Sans";
+    font-family: "Geist Mono";
     font-size: 1.2em;
     padding: 8px 16px;
-    background: #FF8DA1;
-    color: #00000C;
+    background: #BBBD2B;
+    color: #FCF8EA;
     cursor: pointer;
     border: none;
   `;
