@@ -11,9 +11,14 @@ const ACCENT_COLOR = "#BBBD2B";
 const FONT = "Geist Mono";
 
 const MAX_WIDTH = 560;                 
-const APPLY_PAGE_BACKGROUND = true;
+const APPLY_PAGE_BACKGROUND = true;    
+const TOUCH_CONTROLS_MAX_WIDTH = 700;  
+const DESKTOP_ASPECT = 1.25;           
+const TOUCH_ASPECT = 1.25;             
+const CONTROL_SIZE_RATIO = 0.10;      
+const CONTROL_MIN = 32;                
+const CONTROL_MAX = 40;                
 
-const TOUCH_CONTROLS_MAX_WIDTH = 700;
 const showTouchControls = () => window.innerWidth <= TOUCH_CONTROLS_MAX_WIDTH;
 
 let gameStarted = false;
@@ -29,24 +34,48 @@ let animationId;
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 
+let W = 0;
+let H = 0;
+const view = {
+  get width() { return W; },
+  get height() { return H; },
+};
+
+
 if (APPLY_PAGE_BACKGROUND) {
   document.documentElement.style.backgroundColor = BG_COLOR;
   document.body.style.backgroundColor = BG_COLOR;
 }
-canvas.style.backgroundColor = BG_COLOR;
+document.body.style.margin = "0";
+
+for (const el of [document.documentElement, document.body, canvas]) {
+  el.style.userSelect = "none";
+  el.style.webkitUserSelect = "none";
+  el.style.webkitTouchCallout = "none";
+  el.style.webkitTapHighlightColor = "transparent";
+}
 canvas.style.touchAction = "none";
 canvas.style.display = "block";
-canvas.style.maxWidth = "100%";
+canvas.style.backgroundColor = BG_COLOR;
+canvas.style.outline = "none";
+canvas.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+canvas.addEventListener("selectstart", (e) => e.preventDefault());
 
 function resizeCanvas() {
   const container = canvas.parentElement || document.body;
-  const width = Math.min(container.clientWidth || window.innerWidth, MAX_WIDTH);
-  const height = Math.min(width * (showTouchControls() ? 0.95 : 0.75), window.innerHeight * 0.85);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
 
-  canvas.width = Math.round(width);
-  canvas.height = Math.round(height);
+  W = Math.round(Math.min(container.clientWidth || window.innerWidth, MAX_WIDTH));
+  const aspect = showTouchControls() ? TOUCH_ASPECT : DESKTOP_ASPECT;
+  H = Math.round(Math.min(W * aspect, window.innerHeight * 0.95));
 
-  releaseAllTouch(); // avoids a "stuck" button if the embed resizes mid-game
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  releaseAllTouch(); 
 
   if (!gameStarted) {
     showStartScreen();
@@ -59,11 +88,11 @@ function resizeCanvas() {
 let uiButton = null;
 
 function drawButton(label, centerY, onClick) {
-  const fontSize = clamp(canvas.width * 0.035, 13, 22);
+  const fontSize = clamp(W * 0.035, 13, 22);
   ctx.font = `${fontSize}px ${FONT}`;
   const w = ctx.measureText(label).width + fontSize * 2.4;
   const h = fontSize * 2.2;
-  const x = canvas.width / 2 - w / 2;
+  const x = W / 2 - w / 2;
   const y = centerY - h / 2;
 
   ctx.fillStyle = ACCENT_COLOR;
@@ -71,7 +100,7 @@ function drawButton(label, centerY, onClick) {
   ctx.fillStyle = BG_COLOR;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(label, canvas.width / 2, centerY + fontSize * 0.05);
+  ctx.fillText(label, W / 2, centerY + fontSize * 0.05);
 
   uiButton = { x, y, w, h, onClick };
 }
@@ -84,37 +113,37 @@ function hitTest(rect, px, py, pad = 0) {
 function toCanvasCoords(e) {
   const r = canvas.getBoundingClientRect();
   return {
-    x: (e.clientX - r.left) * (canvas.width / r.width),
-    y: (e.clientY - r.top) * (canvas.height / r.height),
+    x: (e.clientX - r.left) * (W / r.width),
+    y: (e.clientY - r.top) * (H / r.height),
   };
 }
 
 
 function showStartScreen() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = TEXT_COLOR;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  const titleSize = clamp(canvas.width * 0.075, 20, 56);
-  const bodySize = clamp(canvas.width * 0.027, 10, 17);
+  const titleSize = clamp(W * 0.075, 20, 56);
+  const bodySize = clamp(W * 0.027, 10, 17);
 
   ctx.font = `${titleSize}px ${FONT}`;
-  drawLines(["OOPS! SOMETHING", "WENT WRONG"], canvas.height * 0.2, titleSize * 1.2);
+  drawLines(["OOPS! SOMETHING", "WENT WRONG"], H * 0.2, titleSize * 1.2);
 
   const instructions = showTouchControls()
     ? ["DESTROY THE BUGS", "TO RETURN HOME!", "", "USE THE BUTTONS", "TO MOVE AND SHOOT"]
     : ["DESTROY THE BUGS TO RETURN HOME!", "", "USE ARROW KEYS TO MOVE", "PRESS SPACE TO SHOOT"];
 
   ctx.font = `${bodySize}px ${FONT}`;
-  drawLines(instructions, canvas.height * 0.48, bodySize * 1.6);
+  drawLines(instructions, H * 0.48, bodySize * 1.6);
 
-  drawButton("START GAME", canvas.height * 0.82, startGame);
+  drawButton("START GAME", H * 0.82, startGame);
 }
 
 function drawLines(lines, startY, lineHeight) {
   lines.forEach((line, index) => {
-    ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
+    ctx.fillText(line, W / 2, startY + index * lineHeight);
   });
 }
 
@@ -122,12 +151,12 @@ function showGameOverScreen() {
   releaseAllTouch();
 
   ctx.fillStyle = TEXT_COLOR;
-  ctx.font = `${clamp(canvas.width * 0.07, 22, 60)}px ${FONT}`;
+  ctx.font = `${clamp(W * 0.07, 22, 60)}px ${FONT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(didWin ? "YOU WIN" : "GAME OVER", canvas.width / 2, canvas.height * 0.45);
+  ctx.fillText(didWin ? "YOU WIN" : "GAME OVER", W / 2, H * 0.45);
 
-  drawButton("PLAY AGAIN", canvas.height * 0.62, startGame);
+  drawButton("PLAY AGAIN", H * 0.62, startGame);
 }
 
 
@@ -137,10 +166,10 @@ function startGame() {
   isGameOver = false;
   didWin = false;
 
-  playerBulletController = new BulletController(canvas, 10, ACCENT_COLOR, true);
-  enemyBulletController = new BulletController(canvas, 4, TEXT_COLOR, false);
-  enemyController = new EnemyController(canvas, enemyBulletController, playerBulletController);
-  player = new Player(canvas, 3, playerBulletController);
+  playerBulletController = new BulletController(view, 10, ACCENT_COLOR, true);
+  enemyBulletController = new BulletController(view, 4, TEXT_COLOR, false);
+  enemyController = new EnemyController(view, enemyBulletController, playerBulletController);
+  player = new Player(view, 3, playerBulletController);
 
   if (animationId) cancelAnimationFrame(animationId);
   animationId = requestAnimationFrame(game);
@@ -157,7 +186,7 @@ function game(timestamp) {
   }
   lastFrameTime = timestamp;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, W, H);
 
   enemyController.draw(ctx);
   player.draw(ctx);
@@ -197,17 +226,17 @@ function fireKey(type, def) {
   document.dispatchEvent(new KeyboardEvent(type, { ...def, bubbles: true, cancelable: true }));
 }
 
-const activePointers = new Map();
+const activePointers = new Map(); // pointerId -> action name
 const pressedActions = new Set();
 
 function getControlRects() {
-  const size = clamp(canvas.width * 0.14, 44, 72);
+  const size = clamp(W * CONTROL_SIZE_RATIO, CONTROL_MIN, CONTROL_MAX);
   const margin = size * 0.3;
-  const y = canvas.height - margin - size;
+  const y = H - margin - size;
   return {
-    left:  { x: margin,                       y, w: size, h: size },
-    right: { x: margin * 2 + size,            y, w: size, h: size },
-    fire:  { x: canvas.width - margin - size, y, w: size, h: size },
+    left:  { x: margin,                 y, w: size, h: size },
+    right: { x: margin * 2 + size,      y, w: size, h: size },
+    fire:  { x: W - margin - size,      y, w: size, h: size },
   };
 }
 
@@ -220,17 +249,14 @@ function drawTouchControls() {
   ctx.fillStyle = ACCENT_COLOR;
 
   for (const [action, r] of Object.entries(rects)) {
-    // faint fill only while pressed
     if (pressedActions.has(action)) {
       ctx.globalAlpha = 0.25;
       ctx.fillRect(r.x, r.y, r.w, r.h);
     }
 
-    // square outline
     ctx.globalAlpha = 1;
     ctx.strokeRect(r.x, r.y, r.w, r.h);
 
-    // arrow
     const cx = r.x + r.w / 2;
     const cy = r.y + r.h / 2;
     const s = r.w * 0.2;
@@ -259,7 +285,7 @@ function drawTouchControls() {
 function actionAt(x, y) {
   const rects = getControlRects();
   for (const [action, r] of Object.entries(rects)) {
-    if (hitTest(r, x, y, r.w * 0.2)) return action;
+    if (hitTest(r, x, y, r.w * 0.3)) return action; // generous hit area
   }
   return null;
 }
@@ -287,9 +313,9 @@ function releaseAllTouch() {
 
 
 canvas.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
   const { x, y } = toCanvasCoords(e);
 
-  // On-canvas start / play again button
   if (uiButton && hitTest(uiButton, x, y)) {
     uiButton.onClick();
     return;
@@ -298,7 +324,6 @@ canvas.addEventListener("pointerdown", (e) => {
   if (showTouchControls() && gameStarted && !isGameOver) {
     const action = actionAt(x, y);
     if (action) {
-      e.preventDefault();
       canvas.setPointerCapture(e.pointerId);
       activePointers.set(e.pointerId, action);
       pressAction(action);
