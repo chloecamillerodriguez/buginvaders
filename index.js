@@ -14,7 +14,7 @@ const GAME_WIDTH = 420;
 const UPDATES_PER_SECOND = 48;        
 const MAX_WIDTH = 560;                
 const APPLY_PAGE_BACKGROUND = true;    
-const TOUCH_CONTROLS_MAX_WIDTH = 550; 
+const TOUCH_CONTROLS_MAX_WIDTH = 600; 
 const DESKTOP_ASPECT = 1.25;           
 const TOUCH_ASPECT = 1.25;             
 const CONTROL_SIZE = 40;              
@@ -154,8 +154,8 @@ function showStartScreen() {
   drawLines(["OOPS! SOMETHING", "WENT WRONG"], H * 0.2, titleSize * 1.2);
 
   const instructions = showTouchControls()
-    ? ["DESTROY THE BUGS", "TO RETURN HOME!", "", "USE THE BUTTONS", "TO MOVE AND SHOOT"]
-    : ["DESTROY THE BUGS TO RETURN HOME!", "", "USE ARROW KEYS TO MOVE", "PRESS SPACE TO SHOOT"];
+    ? ["DESTROY THE BUGS", "TO RETURN HOME!", "", "USE THE BUTTONS", "OR ARROW KEYS + SPACE", "TO MOVE AND SHOOT"]
+    : ["DESTROY THE BUGS TO RETURN HOME!", "", "USE THE BUTTONS", "OR ARROW KEYS + SPACE", "TO MOVE AND SHOOT"];
 
   ctx.font = `${bodySize}px ${FONT}`;
   drawLines(instructions, H * 0.48, bodySize * 1.6);
