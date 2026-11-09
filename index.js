@@ -21,6 +21,17 @@ const CONTROL_SIZE = 40;
 
 const showTouchControls = () => window.innerWidth <= TOUCH_CONTROLS_MAX_WIDTH;
 
+const IMAGES_TO_PRELOAD = [
+  "images/player.png",
+  "images/enemy1.png",
+  "images/enemy2.png",
+];
+const preloadedImages = IMAGES_TO_PRELOAD.map((src) => {
+  const img = new Image();
+  img.src = src;
+  return img;
+});
+
 let gameStarted = false;
 let isGameOver = false;
 let didWin = false;
@@ -58,6 +69,7 @@ canvas.style.touchAction = "none";
 canvas.style.display = "block";
 canvas.style.backgroundColor = BG_COLOR;
 canvas.style.outline = "none";
+canvas.tabIndex = 0;
 canvas.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
 canvas.addEventListener("selectstart", (e) => e.preventDefault());
 
@@ -333,6 +345,8 @@ function releaseAllTouch() {
 
 canvas.addEventListener("pointerdown", (e) => {
   e.preventDefault();
+  window.focus();
+  canvas.focus({ preventScroll: true });
   const { x, y } = toCanvasCoords(e);
 
   if (uiButton && hitTest(uiButton, x, y)) {
@@ -367,6 +381,9 @@ canvas.addEventListener("pointermove", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
+  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(e.key)) {
+    e.preventDefault();
+  }
   if (e.key === "Enter" && uiButton) uiButton.onClick();
 });
 
