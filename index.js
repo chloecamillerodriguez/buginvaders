@@ -10,14 +10,14 @@ const TEXT_COLOR = "#2b2b2b";
 const ACCENT_COLOR = "#BBBD2B";
 const FONT = "Geist Mono";
 
-const MAX_WIDTH = 560;                 
+const GAME_WIDTH = 420;                
+const UPDATES_PER_SECOND = 48;        
+const MAX_WIDTH = 560;                
 const APPLY_PAGE_BACKGROUND = true;    
-const TOUCH_CONTROLS_MAX_WIDTH = 700;  
+const TOUCH_CONTROLS_MAX_WIDTH = 700; 
 const DESKTOP_ASPECT = 1.25;           
 const TOUCH_ASPECT = 1.25;             
-const CONTROL_SIZE_RATIO = 0.10;      
-const CONTROL_MIN = 32;                
-const CONTROL_MAX = 40;                
+const CONTROL_SIZE = 40;              
 
 const showTouchControls = () => window.innerWidth <= TOUCH_CONTROLS_MAX_WIDTH;
 
@@ -34,8 +34,8 @@ let animationId;
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 
-let W = 0;
-let H = 0;
+let W = GAME_WIDTH;
+let H = Math.round(GAME_WIDTH * DESKTOP_ASPECT);
 const view = {
   get width() { return W; },
   get height() { return H; },
@@ -64,18 +64,28 @@ canvas.addEventListener("selectstart", (e) => e.preventDefault());
 function resizeCanvas() {
   const container = canvas.parentElement || document.body;
   const dpr = Math.min(window.devicePixelRatio || 1, 3);
-
-  W = Math.round(Math.min(container.clientWidth || window.innerWidth, MAX_WIDTH));
   const aspect = showTouchControls() ? TOUCH_ASPECT : DESKTOP_ASPECT;
-  H = Math.round(Math.min(W * aspect, window.innerHeight * 0.95));
 
-  canvas.width = Math.round(W * dpr);
-  canvas.height = Math.round(H * dpr);
-  canvas.style.width = W + "px";
-  canvas.style.height = H + "px";
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  W = GAME_WIDTH;
+  H = Math.round(GAME_WIDTH * aspect);
 
-  releaseAllTouch(); 
+  let displayW = Math.min(container.clientWidth || window.innerWidth, MAX_WIDTH);
+  let displayH = displayW * aspect;
+  const maxH = window.innerHeight * 0.95;
+  if (displayH > maxH) {
+    displayH = maxH;
+    displayW = displayH / aspect;
+  }
+  displayW = Math.round(displayW);
+  displayH = Math.round(displayH);
+
+  canvas.style.width = displayW + "px";
+  canvas.style.height = displayH + "px";
+  canvas.width = Math.round(displayW * dpr);
+  canvas.height = Math.round(displayH * dpr);
+  ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+
+  releaseAllTouch();
 
   if (!gameStarted) {
     showStartScreen();
@@ -88,7 +98,7 @@ function resizeCanvas() {
 let uiButton = null;
 
 function drawButton(label, centerY, onClick) {
-  const fontSize = clamp(W * 0.035, 13, 22);
+  const fontSize = W * 0.04;
   ctx.font = `${fontSize}px ${FONT}`;
   const w = ctx.measureText(label).width + fontSize * 2.4;
   const h = fontSize * 2.2;
@@ -125,8 +135,8 @@ function showStartScreen() {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  const titleSize = clamp(W * 0.075, 20, 56);
-  const bodySize = clamp(W * 0.027, 10, 17);
+  const titleSize = W * 0.085;
+  const bodySize = W * 0.036;
 
   ctx.font = `${titleSize}px ${FONT}`;
   drawLines(["OOPS! SOMETHING", "WENT WRONG"], H * 0.2, titleSize * 1.2);
@@ -151,7 +161,7 @@ function showGameOverScreen() {
   releaseAllTouch();
 
   ctx.fillStyle = TEXT_COLOR;
-  ctx.font = `${clamp(W * 0.07, 22, 60)}px ${FONT}`;
+  ctx.font = `${W * 0.085}px ${FONT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(didWin ? "YOU WIN" : "GAME OVER", W / 2, H * 0.45);
@@ -171,21 +181,17 @@ function startGame() {
   enemyController = new EnemyController(view, enemyBulletController, playerBulletController);
   player = new Player(view, 3, playerBulletController);
 
+  lastTime = 0;
+  accumulator = 0;
   if (animationId) cancelAnimationFrame(animationId);
   animationId = requestAnimationFrame(game);
 }
 
-const TARGET_FPS = 70;
-const FRAME_DURATION = 1000 / TARGET_FPS;
-let lastFrameTime = 0;
+const STEP = 1000 / UPDATES_PER_SECOND;
+let lastTime = 0;
+let accumulator = 0;
 
-function game(timestamp) {
-  if (timestamp - lastFrameTime < FRAME_DURATION) {
-    animationId = requestAnimationFrame(game);
-    return;
-  }
-  lastFrameTime = timestamp;
-
+function stepGame() {
   ctx.clearRect(0, 0, W, H);
 
   enemyController.draw(ctx);
@@ -196,6 +202,19 @@ function game(timestamp) {
   if (showTouchControls()) drawTouchControls();
 
   checkGameOver();
+}
+
+function game(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  accumulator += Math.min(timestamp - lastTime, 100); 
+  lastTime = timestamp;
+
+  let steps = 0;
+  while (accumulator >= STEP && steps < 5 && !isGameOver) {
+    stepGame();
+    accumulator -= STEP;
+    steps++;
+  }
 
   if (isGameOver) {
     showGameOverScreen();
@@ -226,17 +245,17 @@ function fireKey(type, def) {
   document.dispatchEvent(new KeyboardEvent(type, { ...def, bubbles: true, cancelable: true }));
 }
 
-const activePointers = new Map(); // pointerId -> action name
+const activePointers = new Map(); 
 const pressedActions = new Set();
 
 function getControlRects() {
-  const size = clamp(W * CONTROL_SIZE_RATIO, CONTROL_MIN, CONTROL_MAX);
+  const size = CONTROL_SIZE;
   const margin = size * 0.3;
   const y = H - margin - size;
   return {
-    left:  { x: margin,                 y, w: size, h: size },
-    right: { x: margin * 2 + size,      y, w: size, h: size },
-    fire:  { x: W - margin - size,      y, w: size, h: size },
+    left:  { x: margin,            y, w: size, h: size },
+    right: { x: margin * 2 + size, y, w: size, h: size },
+    fire:  { x: W - margin - size, y, w: size, h: size },
   };
 }
 
@@ -285,7 +304,7 @@ function drawTouchControls() {
 function actionAt(x, y) {
   const rects = getControlRects();
   for (const [action, r] of Object.entries(rects)) {
-    if (hitTest(r, x, y, r.w * 0.3)) return action; // generous hit area
+    if (hitTest(r, x, y, r.w * 0.3)) return action;
   }
   return null;
 }
